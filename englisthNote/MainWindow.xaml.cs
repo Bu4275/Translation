@@ -20,6 +20,8 @@ using System.Reflection;
 using Microsoft.VisualBasic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
+using gma.System.Windows;
+//using UserActivety;
 namespace englisthNote
 {
     /// <summary>
@@ -29,7 +31,10 @@ namespace englisthNote
     {
         string url;
         string curSearchStr;
+        string curCopyStr = "";
         Timer timer1 = new Timer();
+        UserActivityHook actHook;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -41,41 +46,71 @@ namespace englisthNote
             webBrowser1.Navigated += new NavigatedEventHandler(wbMain_Navigated);
             textBox1.Focus();
             load_words();
+
+            
+            //hook
+            actHook = new UserActivityHook();
+            actHook.OnMouseActivity += new System.Windows.Forms.MouseEventHandler(MouseMoved);
+            
+            actHook.KeyDown += new System.Windows.Forms.KeyEventHandler(MyKeyDown);
+            actHook.KeyPress += new System.Windows.Forms.KeyPressEventHandler(MyKeyPress);
+            actHook.KeyUp += new System.Windows.Forms.KeyEventHandler(MyKeyUp);
+            actHook.Start();
+
         }
 
-        #region silent mode
-        void wbMain_Navigated(object sender, NavigationEventArgs e)
+        #region 滑鼠鍵盤監控
+        public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            SetSilent(webBrowser1, true); // make it silent
-        }
-        public static void SetSilent(System.Windows.Controls.WebBrowser browser, bool silent)
-        {
-            if (browser == null)
-                throw new ArgumentNullException("browser");
+            Console.WriteLine("keydown");
 
-            // get an IWebBrowser2 from the document
-            IOleServiceProvider sp = browser.Document as IOleServiceProvider;
-            if (sp != null)
+        }
+        public void MyKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            Console.WriteLine("keypress");
+        }
+        public void MyKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            Console.WriteLine("keyup");
+            // 當複製的文字與上一次不一樣才觸發
+            if (curCopyStr != System.Windows.Forms.Clipboard.GetText() && System.Windows.Forms.Clipboard.GetText().Length < 30)
             {
-                Guid IID_IWebBrowserApp = new Guid("0002DF05-0000-0000-C000-000000000046");
-                Guid IID_IWebBrowser2 = new Guid("D30C1661-CDAF-11d0-8A3E-00C04FC9E26E");
-
-                object webBrowser;
-                sp.QueryService(ref IID_IWebBrowserApp, ref IID_IWebBrowser2, out webBrowser);
-                if (webBrowser != null)
-                {
-                    webBrowser.GetType().InvokeMember("Silent", BindingFlags.Instance | BindingFlags.Public | BindingFlags.PutDispProperty, null, webBrowser, new object[] { silent });
-                }
+                Console.WriteLine(System.Windows.Forms.Clipboard.GetText());
+                curCopyStr = System.Windows.Forms.Clipboard.GetText();
+                textBox1.Text = curCopyStr;
+                insertBtn_Click(null, null);
             }
         }
-        [ComImport, Guid("6D5140C1-7436-11CE-8034-00AA006009FA"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        private interface IOleServiceProvider
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        public void MouseMoved(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            [PreserveSig]
-            int QueryService([In] ref Guid guidService, [In] ref Guid riid, [MarshalAs(UnmanagedType.IDispatch)] out object ppvObject);
+            Console.WriteLine("mouse");
+            
+
+            /*
+            listBox_word.Items.Add("123");
+            sw.Stop();
+            if (sw.Elapsed.TotalSeconds > 0.2 && System.Windows.Forms.Clipboard.GetText().Length < 30)
+            {
+                textBox1.Text = System.Windows.Forms.Clipboard.GetText();
+                insertBtn_Click(null, null);
+            }
+            sw.Reset();
+            if (e.Clicks > 0)
+            {
+
+                //textBox.AppendText("MouseButton 	- " + e.Button.ToString() + point);
+                if (e.Button.ToString() == "Left")
+                {
+                    sw.Start();
+                    SendKeys.Send("^{c}");
+                    //SendKeys.Send("^{c}");
+                }
+            }*/
         }
         #endregion
 
+        #region 物件事件
         // 送出查詢 Click
         private void insertBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -168,7 +203,18 @@ namespace englisthNote
                 }
             }
         }
+        // 快捷鍵切換翻譯網站
+        private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.F1)
+                radiobtnGoogle.IsChecked = true;
+            if (e.Key == Key.F2)
+                radiobtnYahoo.IsChecked = true;
+            if (e.Key == Key.F3)
+                radiobtnCambridge.IsChecked = true;
 
+        }
+        #endregion
 
         #region 關閉指定Title的Dialog
         long WM_CLOSE = Convert.ToInt32("10", 16);
@@ -208,15 +254,39 @@ namespace englisthNote
         };
         #endregion
 
-        private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        #region silent mode
+        void wbMain_Navigated(object sender, NavigationEventArgs e)
         {
-            if (e.Key == Key.F1)
-                radiobtnGoogle.IsChecked = true;
-            if (e.Key == Key.F2)
-                radiobtnYahoo.IsChecked = true;
-            if (e.Key == Key.F3)
-                radiobtnCambridge.IsChecked = true;
-            
+            SetSilent(webBrowser1, true); // make it silent
         }
+        public static void SetSilent(System.Windows.Controls.WebBrowser browser, bool silent)
+        {
+            if (browser == null)
+                throw new ArgumentNullException("browser");
+
+            // get an IWebBrowser2 from the document
+            IOleServiceProvider sp = browser.Document as IOleServiceProvider;
+            if (sp != null)
+            {
+                Guid IID_IWebBrowserApp = new Guid("0002DF05-0000-0000-C000-000000000046");
+                Guid IID_IWebBrowser2 = new Guid("D30C1661-CDAF-11d0-8A3E-00C04FC9E26E");
+
+                object webBrowser;
+                sp.QueryService(ref IID_IWebBrowserApp, ref IID_IWebBrowser2, out webBrowser);
+                if (webBrowser != null)
+                {
+                    webBrowser.GetType().InvokeMember("Silent", BindingFlags.Instance | BindingFlags.Public | BindingFlags.PutDispProperty, null, webBrowser, new object[] { silent });
+                }
+            }
+        }
+        [ComImport, Guid("6D5140C1-7436-11CE-8034-00AA006009FA"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IOleServiceProvider
+        {
+            [PreserveSig]
+            int QueryService([In] ref Guid guidService, [In] ref Guid riid, [MarshalAs(UnmanagedType.IDispatch)] out object ppvObject);
+        }
+        #endregion
+
+
     }
 }
