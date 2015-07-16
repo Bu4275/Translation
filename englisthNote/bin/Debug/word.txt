@@ -1,5 +1,2 @@
 hello
-what
-haha
-sample
-sample
+gg

@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using Microsoft.VisualBasic;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Forms;
 namespace englisthNote
 {
     /// <summary>
@@ -28,18 +29,18 @@ namespace englisthNote
     {
         string url;
         string curSearchStr;
+        Timer timer1 = new Timer();
         public MainWindow()
         {
             InitializeComponent();
-
+            //指定預設網站
             url = urldic[website.Google];
             webBrowser1.Navigate(url);
-            // set cookie
-            //InternetSetCookie(url, "JSESSIONID", ""); 
+
             // silent mode 關閉alert
             webBrowser1.Navigated += new NavigatedEventHandler(wbMain_Navigated);
             textBox1.Focus();
-            readLog_enLB();
+            load_words();
         }
 
         #region silent mode
@@ -47,7 +48,7 @@ namespace englisthNote
         {
             SetSilent(webBrowser1, true); // make it silent
         }
-        public static void SetSilent(WebBrowser browser, bool silent)
+        public static void SetSilent(System.Windows.Controls.WebBrowser browser, bool silent)
         {
             if (browser == null)
                 throw new ArgumentNullException("browser");
@@ -75,43 +76,52 @@ namespace englisthNote
         }
         #endregion
 
-        // 允許cookie(測試中)
-        [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern bool InternetSetCookie(string lpszUrlName, string lbszCookieName, string lpszCookieData);
         // 送出查詢 Click
         private void insertBtn_Click(object sender, RoutedEventArgs e)
         {
-            enLB.Items.Add(textBox1.Text);
+            listBox_word.Items.Add(textBox1.Text);
             // 目前搜尋的單字
             curSearchStr = textBox1.Text;
             webBrowser1.Navigate(url + curSearchStr);
+
             // 記錄listBox
-            log_enLB();
+            log_words();
             // 全選
             textBox1.SelectAll();
+
+
+            // 關閉dialog
+            timer1.Tick += new EventHandler(timer1_Tick);
+            timer1.Enabled = true;
+            timer1.Interval = 100;
+            count_hasNotWindows = 0;
         }
         // listBox選擇改變
-        private void enLB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void listBox_word_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (enLB.SelectedItem != null)
+            if (listBox_word.SelectedItem != null)
             {
-                curSearchStr = enLB.SelectedItem.ToString();
+                curSearchStr = listBox_word.SelectedItem.ToString();
                 webBrowser1.Navigate(url + curSearchStr);
             }
         }
-        // listBox刪除內容
-        private void enLB_KeyDown(object sender, KeyEventArgs e)
+        private void listBox_word_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (enLB.SelectedIndex != -1 && e.Key == Key.Delete)
-                enLB.Items.Remove(enLB.SelectedItem);
+            if (listBox_word.SelectedIndex != -1 && e.Key == Key.Delete)
+            {
+                int selectedIndex = listBox_word.SelectedIndex;
+                listBox_word.Items.Remove(listBox_word.SelectedItem);
+                // 可以連續刪除
+                listBox_word.SelectedIndex = selectedIndex - 1;
+                log_words();
+            }
         }
         // textbox 按下Enter
-        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        private void textBox1_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
                 insertBtn_Click(null, null);
         }
-
         // 切換查詢網站
         private void radiobtnGoogle_Checked(object sender, RoutedEventArgs e)
         {
@@ -131,26 +141,20 @@ namespace englisthNote
                 url = urldic[website.Cambridge];
             webBrowser1.Navigate(url + curSearchStr);
         }
-        private void radiobtnDictionary_Checked(object sender, RoutedEventArgs e)
-        {
-            if (radiobtnDictionary.IsChecked == true)
-                url = urldic[website.Dictionary];
-            webBrowser1.Navigate(url + curSearchStr);
-        }
-
-        private void log_enLB()
+        // 記錄目前的單字
+        private void log_words()
         {
             using (FileStream fs = new FileStream("word.txt", FileMode.Create))
             {
                 using (StreamWriter sr = new StreamWriter(fs))
                 {
-                    foreach (string word in enLB.Items)
+                    foreach (string word in listBox_word.Items)
                         sr.WriteLine(word);
                 }
             }
         }
-
-        private void readLog_enLB()
+        // 讀取之前記錄的單字
+        private void load_words()
         {
             if (File.Exists("word.txt"))
             {
@@ -159,30 +163,60 @@ namespace englisthNote
                     string line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        enLB.Items.Add(line);
+                        listBox_word.Items.Add(line);
                     }
                 }
             }
         }
+
+
+        #region 關閉指定Title的Dialog
+        long WM_CLOSE = Convert.ToInt32("10", 16);
+        string WINDOW_TITLE = "Windows 安全性警告";
+
+        [DllImport("user32.dll")]
+        public static extern int FindWindow(string lpClassName, string lpWindowName);
+        [DllImport("user32.dll")]
+        public static extern long PostMessageA(long hWnd, long wMsg, long wParam, long lParam);
+        public void closeWindow(string winTitle)
+        {
+            long lngHWND = FindWindow(null, winTitle);
+            if (lngHWND != 0) PostMessageA(lngHWND, WM_CLOSE, 0, 0);
+        }
+        int count_hasNotWindows = 0;
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            closeWindow(WINDOW_TITLE);
+            return;
+            count_hasNotWindows++;
+            if (count_hasNotWindows > 15) timer1.Enabled = false;
+        }
+        #endregion
+
         #region 支援的網站列表
         enum website
         {
             Google,
-            Dictionary,
             Yahoo,
             Cambridge,
         }
         Dictionary<website, string> urldic = new Dictionary<website, string>
         {
             {website.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#en/zh-TW/"},
-            {website.Dictionary,"http://dictionary.reference.com/browse/"},
-            {website.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
             {website.Cambridge,"http://dictionary.cambridge.org/dictionary/english-chinese-traditional/"},
-            
+            {website.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
         };
         #endregion
 
-
-
+        private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.F1)
+                radiobtnGoogle.IsChecked = true;
+            if (e.Key == Key.F2)
+                radiobtnYahoo.IsChecked = true;
+            if (e.Key == Key.F3)
+                radiobtnCambridge.IsChecked = true;
+            
+        }
     }
 }
