@@ -22,3 +22,15 @@ C:\Users\Bubu\Desktop\en-tw\englisthNote\obj\Debug\englisthNote.Properties.Resou
 C:\Users\Bubu\Desktop\en-tw\englisthNote\obj\Debug\englisthNote.csproj.GenerateResource.Cache
 C:\Users\Bubu\Desktop\en-tw\englisthNote\bin\Debug\englisthNote.exe
 C:\Users\Bubu\Desktop\en-tw\englisthNote\bin\Debug\englisthNote.pdb
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\bin\Debug\englisthNote.exe
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\bin\Debug\englisthNote.pdb
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.csprojResolveAssemblyReference.cache
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\MainWindow.baml
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\MainWindow.g.cs
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\App.g.cs
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote_MarkupCompile.cache
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.g.resources
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.Properties.Resources.resources
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.csproj.GenerateResource.Cache
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.exe
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.pdb
