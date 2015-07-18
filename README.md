@@ -1,10 +1,10 @@
 # en-tw
-Translate englisth to chinese-traditional
+多網站查詢中翻英兼記錄英文單字
 
 #系統需求:
 windows作業系統
 
-.netframwork 4.0 以上
+.NetFramwork 4.0 以上
 
 #使用說明
 左上角文字方塊中輸入英文單字 按下"Enter" 或 搜尋按鈕
