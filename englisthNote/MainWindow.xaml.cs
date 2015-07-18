@@ -73,7 +73,7 @@ namespace englisthNote
         {
             Console.WriteLine("keyup");
             // 當複製的文字與上一次不一樣才觸發
-            if (curCopyStr != System.Windows.Forms.Clipboard.GetText() && System.Windows.Forms.Clipboard.GetText().Length < 30)
+            if (curCopyStr != System.Windows.Forms.Clipboard.GetText() && System.Windows.Forms.Clipboard.GetText().Length < 100)
             {
                 Console.WriteLine(System.Windows.Forms.Clipboard.GetText());
                 curCopyStr = System.Windows.Forms.Clipboard.GetText();
