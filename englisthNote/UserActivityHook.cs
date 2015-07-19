@@ -535,7 +535,7 @@ namespace gma.System.Windows
                 using (Process curProcess = Process.GetCurrentProcess())
                 using (ProcessModule curModule = curProcess.MainModule)
                 {
-                    hMouseHook = SetWindowsHookEx(WH_KEYBOARD_LL, MouseHookProcedure,
+                    hMouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookProcedure,
                         GetModuleHandle(curModule.ModuleName), 0);
                 }
 

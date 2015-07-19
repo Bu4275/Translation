@@ -21,6 +21,9 @@ using Microsoft.VisualBasic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using gma.System.Windows;
+using System.Windows.Interop;
+using System.Windows.Threading;
+using System.Diagnostics;
 //using UserActivety;
 namespace englisthNote
 {
@@ -30,85 +33,47 @@ namespace englisthNote
     public partial class MainWindow : Window
     {
         string url;
-        string curSearchStr;
-        string curCopyStr = "";
+        string curSearchStr, curCopyStr = string.Empty;
+        static bool isFormTop = true;
         Timer timer1 = new Timer();
         UserActivityHook actHook;
-
+        // 建構子
         public MainWindow()
         {
+
             InitializeComponent();
+            
             //指定預設網站
             url = urldic[website.Google];
             webBrowser1.Navigate(url);
 
             // silent mode 關閉alert
             webBrowser1.Navigated += new NavigatedEventHandler(wbMain_Navigated);
-            textBox1.Focus();
+            
+            // 載入查詢過的單字
             load_words();
 
-            
             //hook
             actHook = new UserActivityHook();
-            actHook.OnMouseActivity += new System.Windows.Forms.MouseEventHandler(MouseMoved);
-            
-            actHook.KeyDown += new System.Windows.Forms.KeyEventHandler(MyKeyDown);
-            actHook.KeyPress += new System.Windows.Forms.KeyPressEventHandler(MyKeyPress);
+            //actHook.OnMouseActivity += new System.Windows.Forms.MouseEventHandler(MouseMoved);
+            //actHook.KeyDown += new System.Windows.Forms.KeyEventHandler(MyKeyDown);
+            //actHook.KeyPress += new System.Windows.Forms.KeyPressEventHandler(MyKeyPress);
             actHook.KeyUp += new System.Windows.Forms.KeyEventHandler(MyKeyUp);
             actHook.Start();
 
-        }
+            // Application Idel (閒置時做的事情)
+            DispatcherTimer timer = new DispatcherTimer
+              (
+              TimeSpan.FromTicks(400),
+              DispatcherPriority.ApplicationIdle,// Or DispatcherPriority.SystemIdle
+              (s, e) => { isFormTopCheck(); },
+              System.Windows.Application.Current.Dispatcher
+              );
+            timer.Start();
 
-        #region 滑鼠鍵盤監控
-        public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-            Console.WriteLine("keydown");
-
+            textBox1.Focus();
+            curCopyStr = System.Windows.Forms.Clipboard.GetText();
         }
-        public void MyKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
-        {
-            Console.WriteLine("keypress");
-        }
-        public void MyKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-            Console.WriteLine("keyup");
-            // 當複製的文字與上一次不一樣才觸發
-            if (curCopyStr != System.Windows.Forms.Clipboard.GetText() && System.Windows.Forms.Clipboard.GetText().Length < 100)
-            {
-                Console.WriteLine(System.Windows.Forms.Clipboard.GetText());
-                curCopyStr = System.Windows.Forms.Clipboard.GetText();
-                textBox1.Text = curCopyStr;
-                insertBtn_Click(null, null);
-            }
-        }
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-        public void MouseMoved(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            Console.WriteLine("mouse");
-            
-
-            /*
-            listBox_word.Items.Add("123");
-            sw.Stop();
-            if (sw.Elapsed.TotalSeconds > 0.2 && System.Windows.Forms.Clipboard.GetText().Length < 30)
-            {
-                textBox1.Text = System.Windows.Forms.Clipboard.GetText();
-                insertBtn_Click(null, null);
-            }
-            sw.Reset();
-            if (e.Clicks > 0)
-            {
-
-                //textBox.AppendText("MouseButton 	- " + e.Button.ToString() + point);
-                if (e.Button.ToString() == "Left")
-                {
-                    sw.Start();
-                    SendKeys.Send("^{c}");
-                    //SendKeys.Send("^{c}");
-                }
-            }*/
-        }
-        #endregion
 
         #region 物件事件
         // 送出查詢 Click
@@ -123,13 +88,6 @@ namespace englisthNote
             log_words();
             // 全選
             textBox1.SelectAll();
-
-
-            // 關閉dialog
-            timer1.Tick += new EventHandler(timer1_Tick);
-            timer1.Enabled = true;
-            timer1.Interval = 100;
-            count_hasNotWindows = 0;
         }
         // listBox選擇改變
         private void listBox_word_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -216,26 +174,54 @@ namespace englisthNote
         }
         #endregion
 
-        #region 關閉指定Title的Dialog
-        long WM_CLOSE = Convert.ToInt32("10", 16);
-        string WINDOW_TITLE = "Windows 安全性警告";
+        #region 滑鼠鍵盤監控
+        public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            Console.WriteLine("keydown");
 
-        [DllImport("user32.dll")]
-        public static extern int FindWindow(string lpClassName, string lpWindowName);
-        [DllImport("user32.dll")]
-        public static extern long PostMessageA(long hWnd, long wMsg, long wParam, long lParam);
-        public void closeWindow(string winTitle)
-        {
-            long lngHWND = FindWindow(null, winTitle);
-            if (lngHWND != 0) PostMessageA(lngHWND, WM_CLOSE, 0, 0);
         }
-        int count_hasNotWindows = 0;
-        private void timer1_Tick(object sender, EventArgs e)
+        public void MyKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
-            closeWindow(WINDOW_TITLE);
-            return;
-            count_hasNotWindows++;
-            if (count_hasNotWindows > 15) timer1.Enabled = false;
+            Console.WriteLine("keypress");
+        }
+        public void MyKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            Console.WriteLine("keyup");
+            // 當複製的文字與上一次不一樣才觸發
+            if (curCopyStr != System.Windows.Forms.Clipboard.GetText() && System.Windows.Forms.Clipboard.GetText().Length < 100)
+            {
+                Console.WriteLine(System.Windows.Forms.Clipboard.GetText());
+                curCopyStr = System.Windows.Forms.Clipboard.GetText();
+                textBox1.Text = curCopyStr;
+                insertBtn_Click(null, null);
+            }
+        }
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        public void MouseMoved(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            Console.WriteLine("mouse");
+
+
+            /*
+            listBox_word.Items.Add("123");
+            sw.Stop();
+            if (sw.Elapsed.TotalSeconds > 0.2 && System.Windows.Forms.Clipboard.GetText().Length < 30)
+            {
+                textBox1.Text = System.Windows.Forms.Clipboard.GetText();
+                insertBtn_Click(null, null);
+            }
+            sw.Reset();
+            if (e.Clicks > 0)
+            {
+
+                //textBox.AppendText("MouseButton 	- " + e.Button.ToString() + point);
+                if (e.Button.ToString() == "Left")
+                {
+                    sw.Start();
+                    SendKeys.Send("^{c}");
+                    //SendKeys.Send("^{c}");
+                }
+            }*/
         }
         #endregion
 
@@ -254,7 +240,7 @@ namespace englisthNote
         };
         #endregion
 
-        #region silent mode
+        #region silent mode (取消SSL警告)
         void wbMain_Navigated(object sender, NavigationEventArgs e)
         {
             SetSilent(webBrowser1, true); // make it silent
@@ -287,6 +273,56 @@ namespace englisthNote
         }
         #endregion
 
+        #region 關閉指定Title的Dialog
+        long WM_CLOSE = Convert.ToInt32("10", 16);
+        string WINDOW_TITLE = "Windows 安全性警告";
 
+        [DllImport("user32.dll")]
+        public static extern int FindWindow(string lpClassName, string lpWindowName);
+        [DllImport("user32.dll")]
+        public static extern long PostMessageA(long hWnd, long wMsg, long wParam, long lParam);
+        public void closeWindow(string winTitle)
+        {
+            long lngHWND = FindWindow(null, winTitle);
+            if (lngHWND != 0) PostMessageA(lngHWND, WM_CLOSE, 0, 0);
+        }
+        int count_hasNotWindows = 0;
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            closeWindow(WINDOW_TITLE);
+            return;
+            count_hasNotWindows++;
+            if (count_hasNotWindows > 15) timer1.Enabled = false;
+        }
+        #endregion
+
+        #region 判段視窗是否在最上層
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+        private bool IsActive(IntPtr handle)
+        {
+            IntPtr activeHandle = GetForegroundWindow();
+            return (activeHandle == handle);
+        }
+        public IntPtr GetHandle(Window w)
+        {
+            WindowInteropHelper h = new WindowInteropHelper(this);
+            return h.Handle;
+        }
+        private void isFormTopCheck()
+        {
+            if (!IsActive(GetHandle(this)) && isFormTop)
+            {
+                isFormTop = false;
+                Console.Write("FormIsNotTop");
+            }
+            if (IsActive(GetHandle(this)) && !isFormTop)
+            {
+                isFormTop = true;
+                textBox1.Focus();
+                Console.Write("FormIsTop");
+            }
+        }
+        #endregion
     }
 }
