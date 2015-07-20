@@ -24,6 +24,8 @@ using gma.System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using System.Diagnostics;
+using System.Media;
+using WMPLib;
 //using UserActivety;
 namespace englisthNote
 {
@@ -32,24 +34,25 @@ namespace englisthNote
     /// </summary>
     public partial class MainWindow : Window
     {
-        string url;
-        string curSearchStr, curCopyStr = string.Empty;
-        static bool isFormTop = true;
-        Timer timer1 = new Timer();
-        UserActivityHook actHook;
+        string curUrl;                          // 當前使用的翻譯網站網址(與curWebsite呼應)
+        string curCopyStr = string.Empty;       // Ctrl+C 的內容
+        static bool isFormTop = true;           // 應用程式是否為最上層
+        UserActivityHook actHook;               // 全域鍵盤滑鼠監聽
+        WMPLib.WindowsMediaPlayer Player;       // 聲音播放
+        Websites curWebsite = Websites.Google;  // 使用的翻譯網站
         // 建構子
         public MainWindow()
         {
 
             InitializeComponent();
-            
+
             //指定預設網站
-            url = urldic[website.Google];
-            webBrowser1.Navigate(url);
+            curUrl = WebSite_Url[curWebsite];
+            webBrowser1.Navigate(curUrl);
 
             // silent mode 關閉alert
             webBrowser1.Navigated += new NavigatedEventHandler(wbMain_Navigated);
-            
+
             // 載入查詢過的單字
             load_words();
 
@@ -75,64 +78,22 @@ namespace englisthNote
             curCopyStr = System.Windows.Forms.Clipboard.GetText();
         }
 
-        #region 物件事件
-        // 送出查詢 Click
-        private void insertBtn_Click(object sender, RoutedEventArgs e)
+        #region Function
+        private string getVoiceUrl(string word)
         {
-            listBox_word.Items.Add(textBox1.Text);
-            // 目前搜尋的單字
-            curSearchStr = textBox1.Text;
-            webBrowser1.Navigate(url + curSearchStr);
+            if (curWebsite == Websites.Google)
+                return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N";
+            //the slower sound https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N&ttsspeed=0.24
 
+            return null;
+        }
+        private void translate(string word)
+        {
+            // 目前搜尋的單字
+            textBox1.Text = word;
+            webBrowser1.Navigate(curUrl + word);
             // 記錄listBox
             log_words();
-            // 全選
-            textBox1.SelectAll();
-        }
-        // listBox選擇改變
-        private void listBox_word_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (listBox_word.SelectedItem != null)
-            {
-                curSearchStr = listBox_word.SelectedItem.ToString();
-                webBrowser1.Navigate(url + curSearchStr);
-            }
-        }
-        private void listBox_word_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (listBox_word.SelectedIndex != -1 && e.Key == Key.Delete)
-            {
-                int selectedIndex = listBox_word.SelectedIndex;
-                listBox_word.Items.Remove(listBox_word.SelectedItem);
-                // 可以連續刪除
-                listBox_word.SelectedIndex = selectedIndex - 1;
-                log_words();
-            }
-        }
-        // textbox 按下Enter
-        private void textBox1_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-                insertBtn_Click(null, null);
-        }
-        // 切換查詢網站
-        private void radiobtnGoogle_Checked(object sender, RoutedEventArgs e)
-        {
-            if (radiobtnGoogle.IsChecked == true)
-                url = urldic[website.Google];
-            webBrowser1.Navigate(url + curSearchStr);
-        }
-        private void radiobtnYahoo_Checked(object sender, RoutedEventArgs e)
-        {
-            if (radiobtnYahoo.IsChecked == true)
-                url = urldic[website.Yahoo];
-            webBrowser1.Navigate(url + curSearchStr);
-        }
-        private void radiobtnCambridge_Checked(object sender, RoutedEventArgs e)
-        {
-            if (radiobtnCambridge.IsChecked == true)
-                url = urldic[website.Cambridge];
-            webBrowser1.Navigate(url + curSearchStr);
         }
         // 記錄目前的單字
         private void log_words()
@@ -161,7 +122,67 @@ namespace englisthNote
                 }
             }
         }
-        // 快捷鍵切換翻譯網站
+        #endregion
+
+        #region 物件事件
+        // 送出查詢 Click
+        private void insertBtn_Click(object sender, RoutedEventArgs e)
+        {
+            translate(textBox1.Text);
+            listBox_word.Items.Add(textBox1.Text);
+            // 全選
+            textBox1.SelectAll();
+        }
+        // listBox 選擇改變
+        private void listBox_word_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (listBox_word.SelectedItem != null)
+            {
+                translate(listBox_word.SelectedItem.ToString());
+            }
+        }
+        // listBox 按下Delete時
+        private void listBox_word_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (listBox_word.SelectedIndex != -1 && e.Key == Key.Delete)
+            {
+                int selectedIndex = listBox_word.SelectedIndex;
+                listBox_word.Items.Remove(listBox_word.SelectedItem);
+                // 可以連續刪除
+                listBox_word.SelectedIndex = selectedIndex - 1;
+                log_words();
+            }
+        }
+        // textbox 按下Enter
+        private void textBox1_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                insertBtn_Click(null, null);
+        }
+        // radiobutton 切換查詢網站
+        private void radiobtnGoogle_Checked(object sender, RoutedEventArgs e)
+        {
+            curWebsite = Websites.Google;
+            if (radiobtnGoogle.IsChecked == true)
+                curUrl = WebSite_Url[curWebsite];
+            translate(textBox1.Text);
+        }
+        private void radiobtnYahoo_Checked(object sender, RoutedEventArgs e)
+        {
+            curWebsite = Websites.Yahoo;
+            if (radiobtnYahoo.IsChecked == true)
+                curUrl = WebSite_Url[curWebsite];
+            translate(textBox1.Text);
+        }
+        private void radiobtnCambridge_Checked(object sender, RoutedEventArgs e)
+        {
+            curWebsite = Websites.Cambridge;
+            if (radiobtnCambridge.IsChecked == true)
+                curUrl = WebSite_Url[curWebsite];
+            translate(textBox1.Text);
+        }
+
+        // 監聽Form上的鍵盤(快捷鍵)
         private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.F1)
@@ -170,11 +191,19 @@ namespace englisthNote
                 radiobtnYahoo.IsChecked = true;
             if (e.Key == Key.F3)
                 radiobtnCambridge.IsChecked = true;
+            if (e.Key == Key.F4)
+            {
+                string url = getVoiceUrl(textBox1.Text);
+                if (url == null) return;
 
+                Player = new WMPLib.WindowsMediaPlayer();
+                Player.URL = url;
+                Player.controls.play();
+            }
         }
         #endregion
 
-        #region 滑鼠鍵盤監控
+        #region 全域滑鼠鍵盤監控
         public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             Console.WriteLine("keydown");
@@ -196,47 +225,24 @@ namespace englisthNote
                 insertBtn_Click(null, null);
             }
         }
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         public void MouseMoved(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            Console.WriteLine("mouse");
-
-
-            /*
-            listBox_word.Items.Add("123");
-            sw.Stop();
-            if (sw.Elapsed.TotalSeconds > 0.2 && System.Windows.Forms.Clipboard.GetText().Length < 30)
-            {
-                textBox1.Text = System.Windows.Forms.Clipboard.GetText();
-                insertBtn_Click(null, null);
-            }
-            sw.Reset();
-            if (e.Clicks > 0)
-            {
-
-                //textBox.AppendText("MouseButton 	- " + e.Button.ToString() + point);
-                if (e.Button.ToString() == "Left")
-                {
-                    sw.Start();
-                    SendKeys.Send("^{c}");
-                    //SendKeys.Send("^{c}");
-                }
-            }*/
+            Console.WriteLine("X: " + e.X + ", Y: " + e.Y);
         }
         #endregion
 
         #region 支援的網站列表
-        enum website
+        enum Websites
         {
             Google,
             Yahoo,
             Cambridge,
         }
-        Dictionary<website, string> urldic = new Dictionary<website, string>
+        Dictionary<Websites, string> WebSite_Url = new Dictionary<Websites, string>
         {
-            {website.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#en/zh-TW/"},
-            {website.Cambridge,"http://dictionary.cambridge.org/dictionary/english-chinese-traditional/"},
-            {website.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
+            {Websites.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#en/zh-TW/"},
+            {Websites.Cambridge,"http://dictionary.cambridge.org/dictionary/english-chinese-traditional/"},
+            {Websites.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
         };
         #endregion
 
@@ -273,29 +279,6 @@ namespace englisthNote
         }
         #endregion
 
-        #region 關閉指定Title的Dialog
-        long WM_CLOSE = Convert.ToInt32("10", 16);
-        string WINDOW_TITLE = "Windows 安全性警告";
-
-        [DllImport("user32.dll")]
-        public static extern int FindWindow(string lpClassName, string lpWindowName);
-        [DllImport("user32.dll")]
-        public static extern long PostMessageA(long hWnd, long wMsg, long wParam, long lParam);
-        public void closeWindow(string winTitle)
-        {
-            long lngHWND = FindWindow(null, winTitle);
-            if (lngHWND != 0) PostMessageA(lngHWND, WM_CLOSE, 0, 0);
-        }
-        int count_hasNotWindows = 0;
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            closeWindow(WINDOW_TITLE);
-            return;
-            count_hasNotWindows++;
-            if (count_hasNotWindows > 15) timer1.Enabled = false;
-        }
-        #endregion
-
         #region 判段視窗是否在最上層
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
@@ -324,5 +307,7 @@ namespace englisthNote
             }
         }
         #endregion
+
+      
     }
 }

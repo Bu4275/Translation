@@ -34,3 +34,5 @@ C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNo
 C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.csproj.GenerateResource.Cache
 C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.exe
 C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.pdb
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\Interop.WMPLib.dll
+C:\Users\Bubu\Desktop\Application\GitHub\en-tw\englisthNote\obj\Debug\englisthNote.csproj.ResolveComReference.cache
