@@ -40,11 +40,15 @@ namespace englisthNote
         UserActivityHook actHook;               // 全域鍵盤滑鼠監聽
         WMPLib.WindowsMediaPlayer Player;       // 聲音播放
         Websites curWebsite = Websites.Google;  // 使用的翻譯網站
+        string saveword_filename = "word.txt";
         // 建構子
         public MainWindow()
         {
 
             InitializeComponent();
+
+            // 載入查詢過的單字
+            load_words();
 
             //指定預設網站
             curUrl = WebSite_Url[curWebsite];
@@ -52,9 +56,6 @@ namespace englisthNote
 
             // silent mode 關閉alert
             webBrowser1.Navigated += new NavigatedEventHandler(wbMain_Navigated);
-
-            // 載入查詢過的單字
-            load_words();
 
             //hook
             actHook = new UserActivityHook();
@@ -81,8 +82,8 @@ namespace englisthNote
         #region Function
         private string getVoiceUrl(string word)
         {
-            if (curWebsite == Websites.Google)
-                return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N";
+            //if (curWebsite == Websites.Google)
+            return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N";
             //the slower sound https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N&ttsspeed=0.24
 
             return null;
@@ -98,7 +99,7 @@ namespace englisthNote
         // 記錄目前的單字
         private void log_words()
         {
-            using (FileStream fs = new FileStream("word.txt", FileMode.Create))
+            using (FileStream fs = new FileStream(saveword_filename, FileMode.Create))
             {
                 using (StreamWriter sr = new StreamWriter(fs))
                 {
@@ -110,9 +111,9 @@ namespace englisthNote
         // 讀取之前記錄的單字
         private void load_words()
         {
-            if (File.Exists("word.txt"))
+            if (File.Exists(saveword_filename))
             {
-                using (StreamReader sr = new StreamReader("word.txt"))
+                using (StreamReader sr = new StreamReader(saveword_filename))
                 {
                     string line;
                     while ((line = sr.ReadLine()) != null)
@@ -128,8 +129,8 @@ namespace englisthNote
         // 送出查詢 Click
         private void insertBtn_Click(object sender, RoutedEventArgs e)
         {
-            translate(textBox1.Text);
             listBox_word.Items.Add(textBox1.Text);
+            translate(textBox1.Text);
             // 全選
             textBox1.SelectAll();
         }
@@ -165,21 +166,24 @@ namespace englisthNote
             curWebsite = Websites.Google;
             if (radiobtnGoogle.IsChecked == true)
                 curUrl = WebSite_Url[curWebsite];
-            translate(textBox1.Text);
+            if (textBox1.Text != string.Empty)
+                translate(textBox1.Text);
         }
         private void radiobtnYahoo_Checked(object sender, RoutedEventArgs e)
         {
             curWebsite = Websites.Yahoo;
             if (radiobtnYahoo.IsChecked == true)
                 curUrl = WebSite_Url[curWebsite];
-            translate(textBox1.Text);
+            if (textBox1.Text != string.Empty)
+                translate(textBox1.Text);
         }
         private void radiobtnCambridge_Checked(object sender, RoutedEventArgs e)
         {
             curWebsite = Websites.Cambridge;
             if (radiobtnCambridge.IsChecked == true)
                 curUrl = WebSite_Url[curWebsite];
-            translate(textBox1.Text);
+            if (textBox1.Text != string.Empty)
+                translate(textBox1.Text);
         }
 
         // 監聽Form上的鍵盤(快捷鍵)
@@ -308,6 +312,6 @@ namespace englisthNote
         }
         #endregion
 
-      
+
     }
 }
