@@ -60,8 +60,8 @@ namespace englisthNote
             //hook
             actHook = new UserActivityHook();
             //actHook.OnMouseActivity += new System.Windows.Forms.MouseEventHandler(MouseMoved);
-            //actHook.KeyDown += new System.Windows.Forms.KeyEventHandler(MyKeyDown);
             //actHook.KeyPress += new System.Windows.Forms.KeyPressEventHandler(MyKeyPress);
+            actHook.KeyDown += new System.Windows.Forms.KeyEventHandler(MyKeyDown);
             actHook.KeyUp += new System.Windows.Forms.KeyEventHandler(MyKeyUp);
             actHook.Start();
 
@@ -80,6 +80,15 @@ namespace englisthNote
         }
 
         #region Function
+        private void sayTheWord(string word)
+        {
+            string url = getVoiceUrl(word);
+            if (url == null) return;
+
+            Player = new WMPLib.WindowsMediaPlayer();
+            Player.URL = url;
+            Player.controls.play();
+        }
         private string getVoiceUrl(string word)
         {
             //if (curWebsite == Websites.Google)
@@ -185,7 +194,6 @@ namespace englisthNote
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
-
         // 監聽Form上的鍵盤(快捷鍵)
         private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -195,23 +203,17 @@ namespace englisthNote
                 radiobtnYahoo.IsChecked = true;
             if (e.Key == Key.F3)
                 radiobtnCambridge.IsChecked = true;
-            if (e.Key == Key.F4)
-            {
-                string url = getVoiceUrl(textBox1.Text);
-                if (url == null) return;
-
-                Player = new WMPLib.WindowsMediaPlayer();
-                Player.URL = url;
-                Player.controls.play();
-            }
         }
         #endregion
 
-        #region 全域滑鼠鍵盤監控
+        #region 全域滑鼠鍵盤監控(HOOK部分在建構子，注意有沒有加入監聽事件)
         public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            Console.WriteLine("keydown");
-
+            Console.WriteLine("keydown: " + e.KeyData.ToString());
+            if(e.KeyData.ToString() == Key.F4.ToString())
+            {
+                sayTheWord(textBox1.Text);
+            }
         }
         public void MyKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
