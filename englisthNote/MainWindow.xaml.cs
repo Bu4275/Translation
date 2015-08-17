@@ -80,6 +80,7 @@ namespace englisthNote
         }
 
         #region Function
+        // 念出單字
         private void sayTheWord(string word)
         {
             string url = getVoiceUrl(word);
@@ -89,6 +90,7 @@ namespace englisthNote
             Player.URL = url;
             Player.controls.play();
         }
+        // 取得聲音來源網址
         private string getVoiceUrl(string word)
         {
             //if (curWebsite == Websites.Google)
@@ -97,6 +99,7 @@ namespace englisthNote
 
             return null;
         }
+        // 翻譯textbox內的單字，並記錄起來。
         private void translate(string word)
         {
             // 目前搜尋的單字
@@ -136,12 +139,20 @@ namespace englisthNote
 
         #region 物件事件
         // 送出查詢 Click
-        private void insertBtn_Click(object sender, RoutedEventArgs e)
+        private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
             listBox_word.Items.Add(textBox1.Text);
             translate(textBox1.Text);
             // 全選
             textBox1.SelectAll();
+        }
+        private void btn_clearAll_Click(object sender, RoutedEventArgs e)
+        {
+            listBox_word.Items.Clear();
+            using (FileStream fs = new FileStream(saveword_filename, FileMode.Create))
+            {
+                using (StreamWriter sr = new StreamWriter(fs)) { }
+            }
         }
         // listBox 選擇改變
         private void listBox_word_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -167,7 +178,7 @@ namespace englisthNote
         private void textBox1_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-                insertBtn_Click(null, null);
+                btnSearch_Click(null, null);
         }
         // radiobutton 切換查詢網站
         private void radiobtnGoogle_Checked(object sender, RoutedEventArgs e)
@@ -210,7 +221,7 @@ namespace englisthNote
         public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             Console.WriteLine("keydown: " + e.KeyData.ToString());
-            if(e.KeyData.ToString() == Key.F4.ToString())
+            if (e.KeyData.ToString() == Key.F4.ToString())
             {
                 sayTheWord(textBox1.Text);
             }
@@ -228,7 +239,7 @@ namespace englisthNote
                 Console.WriteLine(System.Windows.Forms.Clipboard.GetText());
                 curCopyStr = System.Windows.Forms.Clipboard.GetText();
                 textBox1.Text = curCopyStr;
-                insertBtn_Click(null, null);
+                btnSearch_Click(null, null);
             }
         }
         public void MouseMoved(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -312,6 +323,7 @@ namespace englisthNote
                 Console.Write("FormIsTop");
             }
         }
+
         #endregion
 
 
