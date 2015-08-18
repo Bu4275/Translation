@@ -41,6 +41,9 @@ namespace englisthNote
         WMPLib.WindowsMediaPlayer Player;       // 聲音播放
         Websites curWebsite = Websites.Google;  // 使用的翻譯網站
         string saveword_filename = "word.txt";
+        string say_preword = string.Empty;
+        int say_count = 0;
+        bool islistBox_word_selectchang = true;
         // 建構子
         public MainWindow()
         {
@@ -93,11 +96,23 @@ namespace englisthNote
         // 取得聲音來源網址
         private string getVoiceUrl(string word)
         {
-            //if (curWebsite == Websites.Google)
-            return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N";
-            //the slower sound https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N&ttsspeed=0.24
-
-            return null;
+            // 同個單字念第二次時，回傳唸較慢的版本
+            if (say_preword == word)
+                say_count++;
+            else
+                say_count = 0;
+            
+            if (say_count % 2 == 0)
+            { // The faster version
+                say_preword = word;
+                return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N";
+            }
+            else
+            {
+                //The slower version
+                return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N&ttsspeed=0.24";
+            }
+            
         }
         // 翻譯textbox內的單字，並記錄起來。
         private void translate(string word)
@@ -105,8 +120,6 @@ namespace englisthNote
             // 目前搜尋的單字
             textBox1.Text = word;
             webBrowser1.Navigate(curUrl + word);
-            // 記錄listBox
-            log_words();
         }
         // 記錄目前的單字
         private void log_words()
@@ -138,13 +151,16 @@ namespace englisthNote
         #endregion
 
         #region 物件事件
-        // 送出查詢 Click
+        // 送出查詢 Click ( MyKeyUp 有可能觸發此事件)
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
             listBox_word.Items.Add(textBox1.Text);
             translate(textBox1.Text);
+            log_words();
             // 全選
             textBox1.SelectAll();
+            // 發音
+            if (CheckBox_sayword.IsChecked == true) sayTheWord(textBox1.Text);
         }
         private void btn_clearAll_Click(object sender, RoutedEventArgs e)
         {
@@ -157,12 +173,14 @@ namespace englisthNote
         // listBox 選擇改變
         private void listBox_word_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (listBox_word.SelectedItem != null)
+            if (listBox_word.SelectedItem != null && islistBox_word_selectchang)
             {
                 translate(listBox_word.SelectedItem.ToString());
             }
+            else
+                islistBox_word_selectchang = true;
         }
-        // listBox 按下Delete時
+        // listBox 按 下Delete時(注意會觸發 listBox_word_SelectionChanged )
         private void listBox_word_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (listBox_word.SelectedIndex != -1 && e.Key == Key.Delete)
@@ -172,9 +190,10 @@ namespace englisthNote
                 // 可以連續刪除
                 listBox_word.SelectedIndex = selectedIndex - 1;
                 log_words();
+                islistBox_word_selectchang = false;
             }
         }
-        // textbox 按下Enter
+        // textbox 按下 Enter
         private void textBox1_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -233,7 +252,7 @@ namespace englisthNote
         public void MyKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             Console.WriteLine("keyup");
-            // 當複製的文字與上一次不一樣才觸發
+            // 複製的內容改變時觸發
             if (curCopyStr != System.Windows.Forms.Clipboard.GetText() && System.Windows.Forms.Clipboard.GetText().Length < 100)
             {
                 Console.WriteLine(System.Windows.Forms.Clipboard.GetText());
