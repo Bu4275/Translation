@@ -14,7 +14,7 @@
         <RadioButton x:Name="radiobtnYahoo" Content="Yahoo" HorizontalAlignment="Left" Margin="17,547,0,0" VerticalAlignment="Top" Checked="radiobtnYahoo_Checked"/>
         <RadioButton x:Name="radiobtnCambridge" Content="Cambridge" HorizontalAlignment="Left" Margin="17,585,0,0" VerticalAlignment="Top" Checked="radiobtnCambridge_Checked"/>
         <Button x:Name="btn_clearAll" Content="全部清除" HorizontalAlignment="Left" Margin="125,632,0,0" VerticalAlignment="Top" Width="93" Click="btn_clearAll_Click" Height="33"/>
-        <CheckBox x:Name="CheckBox_sayword" Content="查詢時發音" HorizontalAlignment="Left" Margin="24,642,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.093,-4.067"/>
+        <CheckBox x:Name="CheckBox_listenWord" Content="查詢時聆聽" HorizontalAlignment="Left" Margin="24,642,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.093,-4.067"/>
     </Grid>
 
 </Window>

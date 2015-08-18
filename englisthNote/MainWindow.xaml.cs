@@ -41,8 +41,8 @@ namespace englisthNote
         WMPLib.WindowsMediaPlayer Player;       // 聲音播放
         Websites curWebsite = Websites.Google;  // 使用的翻譯網站
         string saveword_filename = "word.txt";
-        string say_preword = string.Empty;
-        int say_count = 0;
+        string listen_preword = string.Empty;      // 上一次聆聽的單字
+        int listen_count = 0;                      // 同一單字聆聽的次數 (用來區別快與慢的發音)
         bool islistBox_word_selectchang = true;
         // 建構子
         public MainWindow()
@@ -68,15 +68,15 @@ namespace englisthNote
             actHook.KeyUp += new System.Windows.Forms.KeyEventHandler(MyKeyUp);
             actHook.Start();
 
-            // Application Idel (閒置時做的事情)
-            DispatcherTimer timer = new DispatcherTimer
-              (
-              TimeSpan.FromTicks(400),
-              DispatcherPriority.ApplicationIdle,// Or DispatcherPriority.SystemIdle
-              (s, e) => { isFormTopCheck(); },
-              System.Windows.Application.Current.Dispatcher
-              );
-            timer.Start();
+            // Application Idel (閒置時) 判斷視窗是否在最上層
+            //DispatcherTimer timer = new DispatcherTimer
+            //  (
+            //  TimeSpan.FromTicks(400),
+            //  DispatcherPriority.ApplicationIdle,// Or DispatcherPriority.SystemIdle
+            //  (s, e) => { isFormTopCheck(); },
+            //  System.Windows.Application.Current.Dispatcher
+            //  );
+            //timer.Start();
 
             textBox1.Focus();
             curCopyStr = System.Windows.Forms.Clipboard.GetText();
@@ -84,7 +84,7 @@ namespace englisthNote
 
         #region Function
         // 念出單字
-        private void sayTheWord(string word)
+        private void listen_word(string word)
         {
             string url = getVoiceUrl(word);
             if (url == null) return;
@@ -97,14 +97,14 @@ namespace englisthNote
         private string getVoiceUrl(string word)
         {
             // 同個單字念第二次時，回傳唸較慢的版本
-            if (say_preword == word)
-                say_count++;
+            if (listen_preword == word)
+                listen_count++;
             else
-                say_count = 0;
+                listen_count = 0;
             
-            if (say_count % 2 == 0)
+            if (listen_count % 2 == 0)
             { // The faster version
-                say_preword = word;
+                listen_preword = word;
                 return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N";
             }
             else
@@ -151,7 +151,7 @@ namespace englisthNote
         #endregion
 
         #region 物件事件
-        // 送出查詢 Click ( MyKeyUp 有可能觸發此事件)
+        // 送出查詢 Click ( MyKeyUp、textBox1_KeyDown 會觸發此Click)
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
             listBox_word.Items.Add(textBox1.Text);
@@ -160,8 +160,9 @@ namespace englisthNote
             // 全選
             textBox1.SelectAll();
             // 發音
-            if (CheckBox_sayword.IsChecked == true) sayTheWord(textBox1.Text);
+            if (CheckBox_listenWord.IsChecked == true) listen_word(textBox1.Text);
         }
+        // 清除全部(listBox) Click
         private void btn_clearAll_Click(object sender, RoutedEventArgs e)
         {
             listBox_word.Items.Clear();
@@ -193,7 +194,7 @@ namespace englisthNote
                 islistBox_word_selectchang = false;
             }
         }
-        // textbox 按下 Enter
+        // textbox 按下 Enter 時
         private void textBox1_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -236,13 +237,13 @@ namespace englisthNote
         }
         #endregion
 
-        #region 全域滑鼠鍵盤監控(HOOK部分在建構子，注意有沒有加入監聽事件)
+        #region 全域滑鼠鍵盤監控(目前只HOOK KeyDown、KeyUP)
         public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             Console.WriteLine("keydown: " + e.KeyData.ToString());
             if (e.KeyData.ToString() == Key.F4.ToString())
             {
-                sayTheWord(textBox1.Text);
+                listen_word(textBox1.Text);
             }
         }
         public void MyKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
@@ -315,7 +316,7 @@ namespace englisthNote
         }
         #endregion
 
-        #region 判段視窗是否在最上層
+        #region 判段視窗是否在最上層 目前未使用
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
         private bool IsActive(IntPtr handle)
@@ -334,12 +335,6 @@ namespace englisthNote
             {
                 isFormTop = false;
                 Console.Write("FormIsNotTop");
-            }
-            if (IsActive(GetHandle(this)) && !isFormTop)
-            {
-                isFormTop = true;
-                textBox1.Focus();
-                Console.Write("FormIsTop");
             }
         }
 
