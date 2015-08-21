@@ -7,25 +7,12 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Net;
-using System.Web;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Reflection;
-using Microsoft.VisualBasic;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Windows.Forms;
 using gma.System.Windows;
 using System.Windows.Interop;
-using System.Windows.Threading;
-using System.Diagnostics;
-using System.Media;
-using WMPLib;
 //using UserActivety;
 namespace englisthNote
 {
@@ -34,7 +21,7 @@ namespace englisthNote
     /// </summary>
     public partial class MainWindow : Window
     {
-        string curUrl;                          // 當前使用的翻譯網站網址(與curWebsite呼應)
+        string curTranslateUrl;                 // 當前使用的翻譯網站網址(與curWebsite呼應)
         string curCopyStr = string.Empty;       // Ctrl+C 的內容
         static bool isFormTop = true;           // 應用程式是否為最上層
         UserActivityHook actHook;               // 全域鍵盤滑鼠監聽
@@ -54,8 +41,8 @@ namespace englisthNote
             load_words();
 
             //指定預設網站
-            curUrl = WebSite_Url[curWebsite];
-            webBrowser1.Navigate(curUrl);
+            curTranslateUrl = WebSite_Url[curWebsite];
+            webBrowser1.Navigate(curTranslateUrl);
 
             // silent mode 關閉alert
             webBrowser1.Navigated += new NavigatedEventHandler(wbMain_Navigated);
@@ -119,7 +106,7 @@ namespace englisthNote
         {
             // 目前搜尋的單字
             textBox1.Text = word;
-            webBrowser1.Navigate(curUrl + word);
+            webBrowser1.Navigate(curTranslateUrl + word);
         }
         // 記錄目前的單字
         private void log_words()
@@ -205,7 +192,7 @@ namespace englisthNote
         {
             curWebsite = Websites.Google;
             if (radiobtnGoogle.IsChecked == true)
-                curUrl = WebSite_Url[curWebsite];
+                curTranslateUrl = WebSite_Url[curWebsite];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
@@ -213,7 +200,7 @@ namespace englisthNote
         {
             curWebsite = Websites.Yahoo;
             if (radiobtnYahoo.IsChecked == true)
-                curUrl = WebSite_Url[curWebsite];
+                curTranslateUrl = WebSite_Url[curWebsite];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
@@ -221,7 +208,7 @@ namespace englisthNote
         {
             curWebsite = Websites.Cambridge;
             if (radiobtnCambridge.IsChecked == true)
-                curUrl = WebSite_Url[curWebsite];
+                curTranslateUrl = WebSite_Url[curWebsite];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
@@ -277,7 +264,7 @@ namespace englisthNote
         }
         Dictionary<Websites, string> WebSite_Url = new Dictionary<Websites, string>
         {
-            {Websites.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#en/zh-TW/"},
+            {Websites.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#auto/zh-TW/"},
             {Websites.Cambridge,"http://dictionary.cambridge.org/dictionary/english-chinese-traditional/"},
             {Websites.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
         };
@@ -338,8 +325,23 @@ namespace englisthNote
             }
         }
 
+
         #endregion
 
-
+        private void webBrowser1_Navigated(object sender, NavigationEventArgs e)
+        {
+            Console.WriteLine("webBrowser1_Navigated: url={0}", e.Uri);
+            // 如果用GOOGLE翻譯時，使用者改變翻譯的語言，就將其設為預設
+            if (e.Uri.ToString().Contains("https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#"))
+            {
+                string[] urls = e.Uri.ToString().Split('/');
+                string newurl = "";
+                // 取得新的翻譯網址
+                for (int i = 0; i < urls.Length - 1; i++)
+                    newurl += urls[i] + "/";
+                // 改變目前使用的翻譯網址
+                curTranslateUrl = newurl;
+            }
+        }
     }
 }
