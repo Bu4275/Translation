@@ -1,5 +1,9 @@
 # en-tw
-多網站查詢中翻英兼記錄英文單字
+查詢中翻英兼記錄英文單字
+
+Google翻譯可自行透過選擇語言
+
+其餘兩個網站預設只能翻譯英文
 
 #系統需求:
 Windows作業系統
@@ -22,9 +26,7 @@ F3 切換第三個搜尋網頁
 
 F4 播放英文發聲(使用GOOGLE)
 
-在想翻譯的單字上按Ctrl + C 可以直接送出翻譯
-
-(缺點:只是想複製的文字也會送出翻譯)
+在想翻譯的單字上按 Ctrl + C 會自動翻譯
 
 ![image](https://github.com/bubu-mis/en-tw/blob/master/demo.jpg)
 
