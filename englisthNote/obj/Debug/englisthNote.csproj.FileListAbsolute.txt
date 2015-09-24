@@ -64,3 +64,17 @@ C:\Users\bubu\Desktop\en-zh\englisthNote\obj\Debug\englisthNote_MarkupCompile.ca
 C:\Users\bubu\Desktop\en-zh\englisthNote\obj\Debug\englisthNote.g.resources
 C:\Users\bubu\Desktop\en-zh\englisthNote\obj\Debug\englisthNote.Properties.Resources.resources
 C:\Users\bubu\Desktop\en-zh\englisthNote\obj\Debug\englisthNote.csproj.GenerateResource.Cache
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\Interop.WMPLib.dll
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote.csproj.ResolveComReference.cache
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote.exe
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote.pdb
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\bin\Debug\englisthNote.exe
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\bin\Debug\englisthNote.pdb
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote.csprojResolveAssemblyReference.cache
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\MainWindow.baml
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\MainWindow.g.cs
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\App.g.cs
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote_MarkupCompile.cache
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote.g.resources
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote.Properties.Resources.resources
+C:\Users\bubu\Desktop\Application\GitHub\translate\englisthNote\obj\Debug\englisthNote.csproj.GenerateResource.Cache

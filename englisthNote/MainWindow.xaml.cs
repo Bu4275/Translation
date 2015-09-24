@@ -337,7 +337,7 @@ namespace englisthNote
                 string[] urls = e.Uri.ToString().Split('/');
                 string newurl = "";
                 // 取得新的翻譯網址
-                for (int i = 0; i < urls.Length - 1; i++)
+                for (int i = 0; i < 5; i++)
                     newurl += urls[i] + "/";
                 // 改變目前使用的翻譯網址
                 curTranslateUrl = newurl;
