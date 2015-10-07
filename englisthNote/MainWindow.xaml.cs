@@ -343,5 +343,19 @@ namespace englisthNote
                 curTranslateUrl = newurl;
             }
         }
+
+        private void Form1_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            int offset = 30;
+            if (Form1.Width - webBrowser1.Margin.Left - offset > 0)
+                webBrowser1.Width = Form1.Width - webBrowser1.Margin.Left - offset;
+            else
+                webBrowser1.Width = 0;
+
+            if (Form1.Height - webBrowser1.Margin.Bottom - offset > 0)
+                webBrowser1.Height = Form1.Height - webBrowser1.Margin.Top - offset-20;
+            else
+                webBrowser1.Height = 0;
+        }
     }
 }
