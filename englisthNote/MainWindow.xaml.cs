@@ -88,7 +88,7 @@ namespace englisthNote
                 listen_count++;
             else
                 listen_count = 0;
-            
+
             if (listen_count % 2 == 0)
             { // The faster version
                 listen_preword = word;
@@ -99,7 +99,7 @@ namespace englisthNote
                 //The slower version
                 return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N&ttsspeed=0.24";
             }
-            
+
         }
         // 翻譯textbox內的單字，並記錄起來。
         private void translate(string word)
@@ -240,7 +240,7 @@ namespace englisthNote
         public void MyKeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             Console.WriteLine("keyup");
-            // 複製的內容改變時觸發
+            // 複製的內容改變時觸發(limit string's length = 100)
             if (curCopyStr != System.Windows.Forms.Clipboard.GetText() && System.Windows.Forms.Clipboard.GetText().Length < 100)
             {
                 Console.WriteLine(System.Windows.Forms.Clipboard.GetText());
@@ -331,19 +331,32 @@ namespace englisthNote
         private void webBrowser1_Navigated(object sender, NavigationEventArgs e)
         {
             Console.WriteLine("webBrowser1_Navigated: url={0}", e.Uri);
+            string curUrl = e.Uri.ToString();
             // 如果用GOOGLE翻譯時，使用者改變翻譯的語言，就將其設為預設
-            if (e.Uri.ToString().Contains("https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#"))
+            if (curUrl.Contains("https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#"))
             {
-                string[] urls = e.Uri.ToString().Split('/');
-                string newurl = "";
+                string[] urls = curUrl.Split('/');
+                StringBuilder tmpSb = new StringBuilder();
+
                 // 取得新的翻譯網址
                 for (int i = 0; i < 5; i++)
-                    newurl += urls[i] + "/";
-                // 改變目前使用的翻譯網址
-                curTranslateUrl = newurl;
+                    tmpSb.Append(urls[i]).Append("/");
+
+                // change the language of tranlate
+                curTranslateUrl = tmpSb.ToString();
+                tmpSb.Clear();
+
+                // get the google's translate content;
+                for (int i = 5; i < urls.Length; i++)
+                    tmpSb.Append(urls[i]).Append("/");
+                tmpSb.Remove(tmpSb.Length - 1, 1); // remove last char, that is "/"
+
+                textBox1.Text = tmpSb.ToString();
+                
             }
         }
 
+        // Auto changing the size of webBrowser1
         private void Form1_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             int offset = 30;
@@ -353,7 +366,7 @@ namespace englisthNote
                 webBrowser1.Width = 0;
 
             if (Form1.Height - webBrowser1.Margin.Bottom - offset > 0)
-                webBrowser1.Height = Form1.Height - webBrowser1.Margin.Top - offset-20;
+                webBrowser1.Height = Form1.Height - webBrowser1.Margin.Top - offset - 20;
             else
                 webBrowser1.Height = 0;
         }
