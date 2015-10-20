@@ -89,6 +89,13 @@ namespace englisthNote
             else
                 listen_count = 0;
 
+            // cdict
+            if (radiobtn_CdictListen.IsChecked == true)
+            {
+                return "http://s.cdict.net/" + word[0] + "/" + word + ".mp3";
+            }
+
+            //google
             if (listen_count % 2 == 0)
             { // The faster version
                 listen_preword = word;
@@ -99,6 +106,8 @@ namespace englisthNote
                 //The slower version
                 return "https://translate.google.com/translate_tts?ie=UTF-8&q=" + word + "&tl=en&total=1&idx=0&textlen=6&tk=107576&client=t&prev=input&sa=N&ttsspeed=0.24";
             }
+
+
 
         }
         // 翻譯textbox內的單字，並記錄起來。
@@ -191,7 +200,7 @@ namespace englisthNote
         private void radiobtnGoogle_Checked(object sender, RoutedEventArgs e)
         {
             curWebsite = Websites.Google;
-            if (radiobtnGoogle.IsChecked == true)
+            if (radiobtn_Google.IsChecked == true)
                 curTranslateUrl = WebSite_Url[curWebsite];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
@@ -199,7 +208,7 @@ namespace englisthNote
         private void radiobtnYahoo_Checked(object sender, RoutedEventArgs e)
         {
             curWebsite = Websites.Yahoo;
-            if (radiobtnYahoo.IsChecked == true)
+            if (radiobtn_Yahoo.IsChecked == true)
                 curTranslateUrl = WebSite_Url[curWebsite];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
@@ -207,24 +216,32 @@ namespace englisthNote
         private void radiobtnCambridge_Checked(object sender, RoutedEventArgs e)
         {
             curWebsite = Websites.Cambridge;
-            if (radiobtnCambridge.IsChecked == true)
+            if (radiobtn_Cambridge.IsChecked == true)
                 curTranslateUrl = WebSite_Url[curWebsite];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
-        // 監聽Form上的鍵盤(快捷鍵)
+        // local shourtcut
         private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == Key.F1)
-                radiobtnGoogle.IsChecked = true;
-            if (e.Key == Key.F2)
-                radiobtnYahoo.IsChecked = true;
-            if (e.Key == Key.F3)
-                radiobtnCambridge.IsChecked = true;
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.F1)
+                radiobtn_GoogleListen.IsChecked = true;
+            else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.F2)
+                radiobtn_CdictListen.IsChecked = true;
+            else
+            {
+                if (e.Key == Key.F1)
+                    radiobtn_Google.IsChecked = true;
+                if (e.Key == Key.F2)
+                    radiobtn_Yahoo.IsChecked = true;
+                if (e.Key == Key.F3)
+                    radiobtn_Cambridge.IsChecked = true;
+            }
         }
+
         #endregion
 
-        #region 全域滑鼠鍵盤監控(目前只HOOK KeyDown、KeyUP)
+        #region Global shoutcut(目前只HOOK KeyDown、KeyUP)
         public void MyKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             Console.WriteLine("keydown: " + e.KeyData.ToString());
@@ -352,7 +369,7 @@ namespace englisthNote
                 tmpSb.Remove(tmpSb.Length - 1, 1); // remove last char, that is "/"
 
                 textBox1.Text = tmpSb.ToString();
-                
+
             }
         }
 
