@@ -28,5 +28,5 @@ F4 播放英文發聲(使用GOOGLE)
 
 在想翻譯的單字上按 Ctrl + C 會自動翻譯
 
-![image](https://github.com/bubu-mis/en-tw/blob/master/demo.jpg)
+![image](https://github.com/bubu-mis/en-tw/blob/master/demo.png)
 
