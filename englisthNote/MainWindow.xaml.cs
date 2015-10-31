@@ -117,7 +117,7 @@ namespace englisthNote
             textBox1.Text = word;
             webBrowser1.Navigate(curTranslateUrl + word);
         }
-        // 記錄目前的單字
+        // log word in listbox into word.txt
         private void log_words()
         {
             using (FileStream fs = new FileStream(saveword_filename, FileMode.Create))
@@ -237,6 +237,30 @@ namespace englisthNote
                 if (e.Key == Key.F3)
                     radiobtn_Cambridge.IsChecked = true;
             }
+        }
+        // listBox_Drop
+        private void listBox_word_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop, false))
+                e.Effects = DragDropEffects.Copy;
+            else
+                e.Effects = DragDropEffects.None;
+        }
+        private void listBox_word_Drop(object sender, DragEventArgs e)
+        {
+            string[] fileInfo = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            string filePath = string.Join("", fileInfo, 0, fileInfo.Length);
+
+            if (File.Exists(filePath))
+            {
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    string line = string.Empty;
+                    while ((line = sr.ReadLine()) != null)
+                        listBox_word.Items.Add(line);
+                }
+            }
+            log_words();
         }
 
         #endregion
@@ -387,5 +411,8 @@ namespace englisthNote
             else
                 webBrowser1.Height = 0;
         }
+
+
+
     }
 }
