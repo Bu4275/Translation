@@ -217,6 +217,13 @@ namespace englisthNote
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
+        private void radiobtn_Dictionary_Checked(object sender, RoutedEventArgs e)
+        {
+            if (radiobtn_Dictionary.IsChecked == true)
+                curTranslateUrl = Websties_Url[Websites_Names.Dictionary];
+            if (textBox1.Text != string.Empty)
+                translate(textBox1.Text);
+        }
         // local shourtcut
         private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -298,12 +305,14 @@ namespace englisthNote
             Google,
             Yahoo,
             Cambridge,
+            Dictionary,
         }
         Dictionary<Websites_Names, string> Websties_Url = new Dictionary<Websites_Names, string>
         {
             {Websites_Names.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#auto/zh-TW/"},
             {Websites_Names.Cambridge,"http://dictionary.cambridge.org/dictionary/english-chinese-traditional/"},
             {Websites_Names.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
+            {Websites_Names.Dictionary,"http://www.dictionary.com/dic?q="},
         };
         #endregion
 
@@ -407,7 +416,6 @@ namespace englisthNote
             else
                 webBrowser1.Height = 0;
         }
-
 
 
     }
