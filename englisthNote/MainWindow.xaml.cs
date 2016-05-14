@@ -21,12 +21,11 @@ namespace englisthNote
     /// </summary>
     public partial class MainWindow : Window
     {
-        string curTranslateUrl;                 // 當前使用的翻譯網站網址(與curWebsite呼應)
+        string curTranslateUrl;                 // 當前使用的翻譯網站網址
         string curCopyStr = string.Empty;       // Ctrl+C 的內容
         static bool isFormTop = true;           // 應用程式是否為最上層
         UserActivityHook actHook;               // 全域鍵盤滑鼠監聽
         WMPLib.WindowsMediaPlayer Player;       // 聲音播放
-        Websites curWebsite = Websites.Google;  // 使用的翻譯網站
         string saveword_filename = "word.txt";
         string listen_preword = string.Empty;      // 上一次聆聽的單字
         int listen_count = 0;                      // 同一單字聆聽的次數 (用來區別快與慢的發音)
@@ -41,7 +40,7 @@ namespace englisthNote
             load_words();
 
             //指定預設網站
-            curTranslateUrl = WebSite_Url[curWebsite];
+            curTranslateUrl = Websties_Url[Websites_Names.Google];
             webBrowser1.Navigate(curTranslateUrl);
 
             // silent mode 關閉alert
@@ -199,25 +198,22 @@ namespace englisthNote
         // radiobutton 切換查詢網站
         private void radiobtnGoogle_Checked(object sender, RoutedEventArgs e)
         {
-            curWebsite = Websites.Google;
             if (radiobtn_Google.IsChecked == true)
-                curTranslateUrl = WebSite_Url[curWebsite];
+                curTranslateUrl = Websties_Url[Websites_Names.Google];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
         private void radiobtnYahoo_Checked(object sender, RoutedEventArgs e)
         {
-            curWebsite = Websites.Yahoo;
             if (radiobtn_Yahoo.IsChecked == true)
-                curTranslateUrl = WebSite_Url[curWebsite];
+                curTranslateUrl = Websties_Url[Websites_Names.Yahoo];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
         private void radiobtnCambridge_Checked(object sender, RoutedEventArgs e)
         {
-            curWebsite = Websites.Cambridge;
             if (radiobtn_Cambridge.IsChecked == true)
-                curTranslateUrl = WebSite_Url[curWebsite];
+                curTranslateUrl = Websties_Url[Websites_Names.Cambridge];
             if (textBox1.Text != string.Empty)
                 translate(textBox1.Text);
         }
@@ -297,17 +293,17 @@ namespace englisthNote
         #endregion
 
         #region 支援的網站列表
-        enum Websites
+        enum Websites_Names
         {
             Google,
             Yahoo,
             Cambridge,
         }
-        Dictionary<Websites, string> WebSite_Url = new Dictionary<Websites, string>
+        Dictionary<Websites_Names, string> Websties_Url = new Dictionary<Websites_Names, string>
         {
-            {Websites.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#auto/zh-TW/"},
-            {Websites.Cambridge,"http://dictionary.cambridge.org/dictionary/english-chinese-traditional/"},
-            {Websites.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
+            {Websites_Names.Google,"https://translate.google.com/?q=google&ie=UTF-8&hl=zh-TW&sa=N#auto/zh-TW/"},
+            {Websites_Names.Cambridge,"http://dictionary.cambridge.org/dictionary/english-chinese-traditional/"},
+            {Websites_Names.Yahoo,"https://tw.dictionary.yahoo.com/dictionary?p="},
         };
         #endregion
 

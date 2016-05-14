@@ -92,3 +92,7 @@ C:\Users\bubu\Desktop\Application\GitHub\Translation\englisthNote\obj\Debug\engl
 C:\Users\bubu\Desktop\Application\GitHub\Translation\englisthNote\obj\Debug\englisthNote.g.resources
 C:\Users\bubu\Desktop\Application\GitHub\Translation\englisthNote\obj\Debug\englisthNote.Properties.Resources.resources
 C:\Users\bubu\Desktop\Application\GitHub\Translation\englisthNote\obj\Debug\englisthNote.csproj.GenerateResource.Cache
+C:\Users\bubu\Desktop\新增資料夾 (3)\Translation\englisthNote\obj\Debug\Interop.WMPLib.dll
+C:\Users\bubu\Desktop\新增資料夾 (3)\Translation\englisthNote\obj\Debug\englisthNote.csproj.ResolveComReference.cache
+C:\Users\bubu\Desktop\新增資料夾 (3)\Translation\englisthNote\obj\Debug\englisthNote.exe
+C:\Users\bubu\Desktop\新增資料夾 (3)\Translation\englisthNote\obj\Debug\englisthNote.pdb
